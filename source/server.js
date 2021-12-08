@@ -1,21 +1,21 @@
 // Core
 import express from 'express';
-// import session from 'express-session';
 
-// Instruments
-import {classesRoute, subjectsRoute} from './routes';
-// import {
-//     sessionOptions,
-// } from './utils';
+// Routes
+import * as domains from './domains';
 
-// Routers
+import { logger} from './helpers';
 
 const app = express();
 
+app.use(express.json({ limit: '10kb' }));
 
-app.use('/classes', classesRoute);
-app.use('/subjects', subjectsRoute);
-// app.use(session(sessionOptions));
-// app.use(express.json({ limit: '10kb' }));
+app.use(logger());
+
+app.use('/api/teachers', domains.teachers);
+app.use('/api/pupils', domains.pupils);
+app.use('/api/parents', domains.parents);
+app.use('/api/classes', domains.classesRout);
+app.use('/api/subjects', domains.subjects);
 
 export { app };
