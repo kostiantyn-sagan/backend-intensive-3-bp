@@ -1,17 +1,21 @@
 // Core
 import express from 'express';
-import session from 'express-session';
+// import session from 'express-session';
 
 // Instruments
-import {
-    sessionOptions,
-} from './utils';
+import {classesRoute, subjectsRoute} from './routes';
+// import {
+//     sessionOptions,
+// } from './utils';
 
 // Routers
 
 const app = express();
 
-app.use(session(sessionOptions));
-app.use(express.json({ limit: '10kb' }));
+
+app.use('/classes', classesRoute);
+app.use('/subjects', subjectsRoute);
+// app.use(session(sessionOptions));
+// app.use(express.json({ limit: '10kb' }));
 
 export { app };
