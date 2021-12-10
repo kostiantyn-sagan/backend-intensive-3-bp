@@ -4,16 +4,18 @@ import express from 'express';
 // Handlers
 import * as pupils from './';
 import * as person from './person';
-import { authorization } from '../../helpers';
+
+// Instruments
+import { authenticate } from '../../helpers';
 
 const route = express.Router();
 
-route.get('/', authorization(), pupils.get);
-route.post('/', authorization(), pupils.post);
+route.get('/', [ authenticate ], pupils.get);
+route.post('/', [ authenticate ], pupils.post);
 
-route.get('/:personId', authorization(), person.get);
-route.post('/:personId', authorization(), person.post);
-route.put('/:personId', authorization(), person.put);
-route.delete('/:personId', authorization(), person.remove);
+route.get('/:personId', [ authenticate ], person.get);
+route.post('/:personId', [ authenticate ], person.post);
+route.put('/:personId', [ authenticate ], person.put);
+route.delete('/:personId', [ authenticate ], person.remove);
 
 export { route as pupils };
