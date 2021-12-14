@@ -2,13 +2,10 @@
 import express from 'express';
 
 // Handlers
-import * as auth from './';
-
-// Instruments
-import { authenticate } from '../../helpers';
+import * as authenticete from './';
 
 const route = express.Router();
 
-route.post('/login', auth.login);
+route.post('/login', authenticete.post);
 
-export {route as routerAuth};
+export {route as auth};

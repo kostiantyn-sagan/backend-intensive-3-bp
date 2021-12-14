@@ -3,27 +3,25 @@ import dg from 'debug';
 import jwt from 'jsonwebtoken';
 import { promisify } from 'util';
 
+// Instruments
+import {getPassword} from '../../helpers';
+
+const debug = dg('router:auth');
 const sign = promisify(jwt.sign);
-export const login = async (req, res, next) => {
-    const { authorization: auth } = req.headers;
+const key = getPassword();
 
-    if (!auth) {
-        return res.status(401).json({ message: 'no auth header' });
-    }
+export const post = async (req, res) => {
+    debug(`${req.method} - ${req.originalUrl}`);
 
-    const [ type, credentials ] = auth.split(' ');
-    const [ email, password ] = Buffer.from(credentials, 'base64').toString()
-        .split(':');
+    try {
+        const { email, password } = req.body;
+        const emailDecoded = Buffer.from(email, 'base64').toString();
+        const passwordDecoded = Buffer.from(password, 'base64').toString();
 
-    if (password === '123456') {
-        const token = await sign(req.body, key);
-
-        storage.save({ token, key });
-
+        const token = await sign({ email: emailDecoded }, key);
         res.setHeader('X-Token', token);
-
-        return next();
+        res.sendStatus(204);
+    } catch (error) {
+        res.status(401).json({ message: error.message });
     }
-
-    return res.status(401).json({ message: 'credentials are not valid' });
 };

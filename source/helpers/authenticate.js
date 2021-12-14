@@ -1,11 +1,14 @@
-import { getPassword } from './getPassword';
+// Instruments
+import { NotFoundError } from './';
 
-const password = getPassword();
+export const authenticate = (req, res, next) => {
+    if (!req.session.user) {
+        return next(new NotFoundError('cookie not found', 401));
+    }
 
-export const authenticate =  (req, res, next) => {
-    const { authorization } = req.headers;
+    const {email} = req.session.user;
 
-    if (authorization === password) {
+    if (email) {
         next();
     } else {
         res.status(401).json({ message: 'authentication credentials are not valid' });
