@@ -1,4 +1,8 @@
+// Core
 import Ajv from 'ajv';
+
+// Instruments
+import {ValidationError} from './';
 
 export const validator = (schema) => (req, res, next) => {
     const ajv = new Ajv({ allErrors: true });
@@ -8,6 +12,10 @@ export const validator = (schema) => (req, res, next) => {
     if (valid) {
         next();
     } else {
-        res.status(400).json({ data: validate.errors.map(({ message }) => message) });
+        const errors = validate.errors.map(({ message }) => message).join(', ');
+        const body = JSON.stringify(req.body, null, 2);
+
+
+        next(new ValidationError(`${req.method}: ${req.originalUrl} [${errors}]\n${body}`, 400));
     }
 };

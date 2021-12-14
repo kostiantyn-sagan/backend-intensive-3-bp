@@ -15,7 +15,7 @@ route.get('/', classes.get);
 route.post('/', [ authenticate ], classes.post);
 
 route.get('/:classId', [ authenticate ], classId.get);
-route.post('/', [ authenticate ], classId.post);
+route.post('/:classId', [ authenticate ], classId.post);
 route.put('/:classId', [ authenticate ], classId.put);
 route.delete('/:classId', [ authenticate ], classId.remove);
 
