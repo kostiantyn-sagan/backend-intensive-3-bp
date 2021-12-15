@@ -1,37 +1,42 @@
 // Core
 import express from 'express';
+import session from 'express-session';
+import path from 'path';
+import flash from 'connect-flash';
 import passport from 'passport';
-import {Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
+import bodyParser from 'body-parser';
 
 // Routes
 import * as domains from './domains';
+import { passportSetup } from './helpers';
 
 // Instruments
 import {
-    devLogger,
     errorLogger,
     notFoundLogger,
     validationLogger,
-    requireJsonContent,
     getPassword,
     NotFoundError,
 } from './helpers';
 
 const app = express();
-const key = getPassword();
 
-const options = {
-    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-    secretOrKey:    key,
+// view engine setup
+app.set('views', path.join(__dirname, 'views-2fa'));
+app.set('view engine', 'ejs');
+
+const sessionOptions = {
+    key:               'user',
+    secret:            getPassword(),
+    resave:            false,
+    rolling:           true,
+    saveUninitialized: false,
+    cookie:            {
+        httpOnly: true,
+        maxAge:   15 * 60 * 1000,
+    },
 };
 
-passport.use(
-    new JwtStrategy(options, (jwtPayload, done) => {
-        const { email } = jwtPayload;
-
-        return done(null, {email});
-    }),
-);
 
 app.use(
     express.json({
@@ -39,23 +44,17 @@ app.use(
     }),
 );
 
-app.use(requireJsonContent);
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.static(path.join(__dirname, 'public')));
 
-if (process.env.NODE_ENV === 'development') {
-    app.use((req, res, next) => {
-        const body = req.method === 'GET' ? 'Body not supported for GET' : JSON.stringify(req.body, null, 2);
+app.use(session(sessionOptions));
+app.use(flash());
 
-        devLogger.debug(`${req.method}\n${body}`);
-        next();
-    });
-}
-
-app.use('/api/auth', domains.auth);
-app.use('/api/teachers', domains.teachers);
-app.use('/api/pupils', domains.pupils);
-app.use('/api/parents', domains.parents);
-app.use('/api/classes', domains.classes);
-app.use('/api/subjects', domains.subjects);
+passportSetup(passport);
+app.use(passport.initialize());
+app.use(passport.session());
+app.use('/2fa', domains.twoFaRouter);
 
 
 app.use('*', (req, res, next) => {
