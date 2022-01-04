@@ -254,27 +254,21 @@ db.customers.find().forEach((customerId, i) => {
 
 const cursor = db.orders.bulkWrite(orders);
 
-const getPage = (page = 0, size = 10) => {
-    const skip = page * size;
-    const customersCursor = db.customers.find().skip(skip)
-        .limit(size);
+const customersCursor = db.customers.find();
 
-    while (customersCursor.hasNext()) {
-        const { _id, name } = customersCursor.next();
-        const orders = db.orders.aggregate([
-            { $match: { customerId: _id } },
-            { $group: { _id: '$product', total: { $sum: '$count' } } },
-            { $sort: { total: 1 } },
-        ]);
+while (customersCursor.hasNext()) {
+    const { _id, name } = customersCursor.next();
+    const orders = db.orders.aggregate([
+        { $match: { customerId: _id } },
+        { $group: { _id: '$product', total: { $sum: '$count' } } },
+        { $sort: { total: 1 } },
+    ]);
 
-        const obj = {
-            fName:  name.first,
-            lName:  name.last,
-            orders: orders.toArray(),
-        };
+    const obj = {
+        fName:  name.first,
+        lName:  name.last,
+        orders: orders.toArray(),
+    };
 
-        print(obj);
-    }
-};
-
-getPage();
+    print(obj);
+}

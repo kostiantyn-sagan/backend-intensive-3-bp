@@ -219,7 +219,7 @@ db.orders.drop();
 const orders = [];
 const users = [];
 
-for (let i = 0; i < 10; i++) {
+for (let i = 0; i < 3000; i++) {
     const user = {
         name: {
             first: faker.fName(),
@@ -231,9 +231,9 @@ for (let i = 0; i < 10; i++) {
     users.push(user);
 }
 
-const { insertedIds } = db.customers.insertMany(users);
+const {insertedIds} = db.customers.insertMany(users);
 
-db.customers.find().forEach((customerId, i) => {
+insertedIds.forEach((customerId, i) => {
     for (let j = 0; j < randomNumber(1, 20); j++) {
         const order = {
             customerId: customerId,
@@ -254,27 +254,20 @@ db.customers.find().forEach((customerId, i) => {
 
 const cursor = db.orders.bulkWrite(orders);
 
-const getPage = (page = 0, size = 10) => {
-    const skip = page * size;
-    const customersCursor = db.customers.find().skip(skip)
-        .limit(size);
+const customersCursor = db.customers.find();
 
-    while (customersCursor.hasNext()) {
-        const { _id, name } = customersCursor.next();
-        const orders = db.orders.aggregate([
-            { $match: { customerId: _id } },
-            { $group: { _id: '$product', total: { $sum: '$count' } } },
-            { $sort: { total: 1 } },
-        ]);
+while (customersCursor.hasNext()) {
+    const { _id, name } = customersCursor.next();
+    const orders = db.orders.find(
+        { customerId: _id },
+        { _id: 1, count: 1, price: 2, discount: 3, product: 4 },
+    );
 
-        const obj = {
-            fName:  name.first,
-            lName:  name.last,
-            orders: orders.toArray(),
-        };
+    const obj = {
+        fName:  name.first,
+        lName:  name.last,
+        orders: orders.toArray(),
+    };
 
-        print(obj);
-    }
-};
-
-getPage();
+    print(tojson(obj));
+}
