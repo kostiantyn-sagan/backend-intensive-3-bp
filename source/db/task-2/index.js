@@ -214,6 +214,13 @@ const faker = {
 };
 
 db.customers.drop();
+
+
+db.customers.createIndex(
+    { nickname: 1, email: 1 },
+    {unique: true},
+);
+
 db.orders.drop();
 
 const orders = [];

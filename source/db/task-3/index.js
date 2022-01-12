@@ -214,6 +214,14 @@ const faker = {
 };
 
 db.customers.drop();
+
+db.customers.createIndex({
+    'name.first': 'text',
+    'name.last':  'text',
+    nickname:     'text',
+    email:        'text',
+});
+
 db.orders.drop();
 
 const orders = [];
